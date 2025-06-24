@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Sense</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="column left-column">
+        <h2>Navigation</h2>
+        <div class="tab-button active" data-tab="home">Home</div>
+        <div class="tab-button" data-tab="collect">Collect</div>
+        <div class="tab-button" data-tab="combat">Combat</div>
+        <div class="tab-button" data-tab="upgrades">Upgrades</div>
+        <div class="tab-button" data-tab="skills">Skills</div>
+        <div class="tab-button" data-tab="settings">Settings</div>
+      </div>
+      <div class="column middle-column">
+        <div id="home" class="tab-content active">
+          <h2>Number Sense</h2>
+          <p>Current Profile: <span id="home-profile-name"></span></p>
+          <p>
+            Welcome to Number Sense! Use the navigation on the left to get
+            started.
+          </p>
+        </div>
+        <div id="collect" class="tab-content">
+          <h2>Collect</h2>
+          <p>Gather materials to craft items and build your empire.</p>
+          <button class="action-button">Gather Wood</button>
+          <button class="action-button">Mine Stone</button>
+          <button class="action-button">Forage for Herbs</button>
+        </div>
+        <div id="combat" class="tab-content">
+          <h2>Combat</h2>
+          <p>Battle monsters to gain experience and find loot.</p>
+          <button class="action-button">Find a weak monster</button>
+          <button class="action-button">Explore the dark cave</button>
+        </div>
+        <div id="upgrades" class="tab-content">
+          <h2>Upgrades</h2>
+          <p>Purchase upgrades to improve your resource generation.</p>
+          <button class="action-button">
+            Upgrade Gold Gain (Cost: 100 Wood)
+          </button>
+        </div>
+        <div id="skills" class="tab-content">
+          <h2>Skills</h2>
+          <p>Level up your skills to unlock new abilities.</p>
+          <div id="skills-container"></div>
+        </div>
+        <div id="settings" class="tab-content">
+          <h2>Settings</h2>
+          <div class="setting-option">
+            <label>Profile</label>
+            <div class="custom-dropdown">
+              <div class="custom-dropdown-selected" id="profile-selector">
+                <span id="profile-selected-label"></span>
+                <span class="dropdown-arrow"></span>
+              </div>
+              <div class="custom-dropdown-options" id="profile-options"></div>
+            </div>
+          </div>
+          <div class="setting-option">
+            <label>Profile Management</label>
+            <button id="new-profile-button">New Profile</button>
+            <button id="rename-profile-button">Rename Current Profile</button>
+            <button id="delete-profile-button">Delete Current Profile</button>
+          </div>
+          <div class="setting-option">
+            <label>Save Profile</label>
+            <button id="save-profile-button">Save Profile</button>
+          </div>
+          <div class="setting-option">
+             <label>Danger Zone</label>
+            <button id="hard-reset-button">Hard Reset</button>
+          </div>
+          <div class="setting-option">
+            <label for="color-theme">Color Theme</label>
+            <div class="custom-dropdown">
+              <div class="custom-dropdown-selected" id="theme-selector">
+                <span id="theme-selected-label"></span>
+                <span class="dropdown-arrow"></span>
+              </div>
+              <div class="custom-dropdown-options" id="theme-options"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="column right-column">
+        <h2>Stats & Resources</h2>
+        <div class="stat-display">
+          <span>Profile: </span><span id="current-profile-name"></span>
+        </div>
+        <hr />
+        <div class="resource-display">
+          <span>Gold: </span><span id="gold">0</span>
+        </div>
+        <div class="resource-display">
+          <span>Wood: </span><span id="wood">0</span>
+        </div>
+        <hr />
+        <div class="stat-display">
+          <span>Strength: </span><span id="strength">1</span>
+        </div>
+        <div class="stat-display">
+          <span>Intelligence: </span><span id="intelligence">1</span>
+        </div>
+      </div>
+    </div>
+    <div id="confirmation-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <h2 id="modal-title">Confirm Action</h2>
+        <p id="modal-text"></p>
+        <div class="modal-buttons">
+          <button id="modal-confirm-button">Confirm</button>
+          <button id="modal-cancel-button">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
