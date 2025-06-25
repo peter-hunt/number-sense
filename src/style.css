@@ -256,6 +256,10 @@ body {
   flex: 1;
   background-color: var(--left-column-bg);
 }
+.left-column.locked .tab-button:not(.active) {
+    pointer-events: none;
+    opacity: 0.5;
+}
 .middle-column {
   flex: 3;
   background-color: var(--middle-column-bg);
@@ -334,6 +338,16 @@ h2 {
 
 #settings .setting-option button.danger-zone-button:hover {
     background-color: #c00 !important;
+}
+
+#settings .setting-option button.warning-zone-button {
+    background-color: #b8860b !important;
+    color: #fff !important;
+    border: 1px solid #daa520 !important;
+}
+
+#settings .setting-option button.warning-zone-button:hover {
+    background-color: #daa520 !important;
 }
 
 .custom-dropdown {
@@ -558,4 +572,38 @@ h2 {
   background: var(--h2-color);
   cursor: pointer;
   border: 1px solid var(--button-border);
+}
+
+@keyframes welcome-highlight {
+  0% {
+    color: var(--h2-color);
+    transform: scale(1.1);
+    font-weight: 900;
+  }
+  100% {
+    color: var(--body-color);
+    transform: scale(1);
+    font-weight: normal;
+  }
+}
+
+.highlight-profile-name {
+  animation: welcome-highlight 1.5s ease-out;
+}
+
+#recently-obtained-container {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+#recently-obtained-container.visible {
+  opacity: 1;
+}
+
+.gain-display {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 3px;
 }

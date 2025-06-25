@@ -4,23 +4,17 @@
       "name": "Adventurer",
       "data": {
         "skills": {
-          "Woodcutting": {
-            "totalXP": 0
-          },
-          "Mining": {
-            "totalXP": 0
-          },
-          "Foraging": {
-            "totalXP": 0
-          }
+          "woodcutting": 0,
+          "mining": 0,
+          "foraging": 0
         },
         "inventory": {
-          "Wood": 0,
-          "Stone": 0,
-          "Herbs": 0
+          "wood": 0,
+          "stone": 0,
+          "herbs": 0
         }
       }
     }
   ],
-  "selectedProfileIndex": 0
+  "selected_profile_index": 0
 }

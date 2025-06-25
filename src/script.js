@@ -1,21 +1,36 @@
 // Tab functionality
 const tabs = document.querySelectorAll(".tab-button");
 const tabContents = document.querySelectorAll(".tab-content");
-tabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
+
+function activateTab(tabToActivate) {
+    if (!tabToActivate) return;
     tabs.forEach((t) => t.classList.remove("active"));
-    tab.classList.add("active");
-    const target = document.getElementById(tab.dataset.tab);
+    tabToActivate.classList.add("active");
+    const target = document.getElementById(tabToActivate.dataset.tab);
     tabContents.forEach((content) => content.classList.remove("active"));
     target.classList.add("active");
+}
+
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    // Prevent user from switching tabs if the UI is locked for corruption
+    if (navigationColumn.classList.contains('locked') && !tab.classList.contains('active')) {
+        return;
+    }
+    activateTab(tab);
   });
 });
+
 
 // --- GLOBAL STATE ---
 let gameState = {
   profiles: [],
-  selectedProfileIndex: 0,
+  selected_profile_index: 0,
 };
+let corruptProfileAlertShown = false; // Flag to prevent repeated alerts
+let recentGains = { xp: {}, items: {} };
+let gainsTimeout;
+
 
 // --- DOM ELEMENTS ---
 const profileSelector = document.getElementById("profile-selector");
@@ -33,42 +48,118 @@ const loadingOverlay = document.getElementById("loading-overlay");
 const mainContainer = document.querySelector(".container");
 const inventoryContainer = document.getElementById("inventory-container");
 const recentlyObtainedContainer = document.getElementById("recently-obtained-container");
+const navigationColumn = document.querySelector('.left-column');
+const migrateProfileButton = document.getElementById("migrate-profile-button");
+const migrationControls = document.querySelector('.migration-controls');
 
 // --- API COMMUNICATION ---
 async function fetchApi(endpoint, options = {}) {
   try {
     const response = await fetch(endpoint, options);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "An unknown API error occurred.");
+        let errorMessage;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.error;
+        } catch (e) {
+            errorMessage = `Request failed with status: ${response.status} ${response.statusText}`;
+        }
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        throw error;
     }
+    
     return await response.json();
+    
   } catch (error) {
     console.error(`API Error on ${endpoint}:`, error);
-    showAlert(`Error: ${error.message}`); // Use custom alert
+
+    let title = "Error"; // Default title
+    switch (error.status) {
+        case 400: title = "Invalid Input"; break;
+        case 403: title = "Action Not Allowed"; break;
+        case 409: title = "Name Unavailable"; break;
+        case 501: title = "Feature Not Available"; break;
+        default:  title = "System Error"; break;
+    }
+    
+    showAlert(title, error.message);
     return null;
   }
 }
 
-// --- RENDER FUNCTIONS ---
-function renderAll() {
-  if (!gameState || !gameState.profiles || gameState.profiles.length === 0) {
-    console.error("Cannot render: Invalid game state.", gameState);
+// --- RENDER & UI UPDATE FUNCTIONS ---
+function renderAll(newState) {
+  if (!newState || !newState.profiles || newState.profiles.length === 0) {
+    console.error("Cannot render: Invalid game state.", newState);
     return;
   }
-  const profile = gameState.profiles[gameState.selectedProfileIndex];
+  gameState = newState;
+  const profile = gameState.profiles[gameState.selected_profile_index];
   if (!profile) {
     console.error("Cannot render: Selected profile is missing.");
     return;
   }
-  profileSelectedLabel.innerHTML = `<span>${profile.name}</span><span class="profile-info">Lvl: ${profile.totalLevel}</span>`;
+  
+  handleProfileStatus(profile);
+
+  profileSelectedLabel.innerHTML = `<span>${profile.name}</span><span class="profile-info">Lvl: ${profile.total_level}</span>`;
+  if (profile.status === 'corrupt') {
+      profileSelectedLabel.innerHTML += ` <span style="color:red;">(Corrupt)</span>`;
+  }
   homeProfileName.textContent = profile.name;
   currentProfileName.textContent = profile.name;
+  
   renderProfileOptions();
   renderSkills();
   renderInventory();
   renderRecentlyObtained();
 }
+
+function triggerWelcomeHighlight() {
+    // Remove the class to allow re-triggering the animation
+    homeProfileName.classList.remove('highlight-profile-name');
+    // We use a trick with void to restart the animation
+    void homeProfileName.offsetWidth; 
+    homeProfileName.classList.add('highlight-profile-name');
+}
+
+function handleProfileStatus(profile) {
+    const isCorrupt = profile.status === 'corrupt';
+
+    document.querySelectorAll('.action-button').forEach(btn => btn.disabled = isCorrupt);
+    renameProfileButton.disabled = isCorrupt;
+    hardResetButton.disabled = isCorrupt;
+    deleteProfileButton.disabled = false;
+
+    migrationControls.style.display = isCorrupt ? 'block' : 'none';
+
+    if (isCorrupt) {
+        const settingsTabButton = document.querySelector('.tab-button[data-tab="settings"]');
+        activateTab(settingsTabButton);
+        navigationColumn.classList.add('locked');
+        
+        if (!corruptProfileAlertShown) {
+            showAlert("Profile Corrupt", `The profile "${profile.name}" is corrupt or outdated. All actions are disabled. Please go to the Settings tab to fix or delete it.`);
+            corruptProfileAlertShown = true;
+        }
+    } else {
+        navigationColumn.classList.remove('locked');
+        corruptProfileAlertShown = false;
+    }
+
+    if (isCorrupt) {
+        resetProfileButton.textContent = "Fix Corrupt Profile";
+        resetProfileButton.classList.add("warning-zone-button");
+        resetProfileButton.classList.remove("danger-zone-button");
+    } else {
+        resetProfileButton.textContent = "Reset Current Profile";
+        resetProfileButton.classList.remove("warning-zone-button");
+        resetProfileButton.classList.add("danger-zone-button");
+    }
+}
+
 
 function renderProfileOptions() {
   profileOptions.innerHTML = "";
@@ -76,18 +167,27 @@ function renderProfileOptions() {
     const item = document.createElement("div");
     item.className = "dropdown-item";
     item.dataset.index = index;
-    item.innerHTML = `<span>${profile.name}</span> <span class="profile-info">Lvl: ${profile.totalLevel}</span>`;
+    let displayName = `<span>${profile.name}</span> <span class="profile-info">Lvl: ${profile.total_level}</span>`;
+    if (profile.status === 'corrupt') {
+        displayName += ` <span style="color:red;">(Corrupt)</span>`;
+    }
+    item.innerHTML = displayName;
+
     item.addEventListener("click", async (e) => {
       e.stopPropagation();
       const newIndex = parseInt(e.currentTarget.dataset.index, 10);
+      
       const newState = await fetchApi("/api/profile/select", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ index: newIndex }),
       });
       if (newState) {
-        gameState = newState;
-        renderAll();
+        corruptProfileAlertShown = false; 
+        renderAll(newState);
+        
+        activateTab(document.querySelector('.tab-button[data-tab="home"]'));
+        triggerWelcomeHighlight();
       }
       toggleDropdown(e.currentTarget.closest(".custom-dropdown"));
     });
@@ -105,13 +205,17 @@ function formatNumber(num) {
 function renderSkills() {
   const skillsContainer = document.getElementById("skills-container");
   skillsContainer.innerHTML = "";
-  const profile = gameState.profiles[gameState.selectedProfileIndex];
+  const profile = gameState.profiles[gameState.selected_profile_index];
+  if (profile.status === 'corrupt') {
+      skillsContainer.innerHTML = "<p>This profile is corrupt. Skills cannot be displayed.</p>";
+      return;
+  }
   if (profile && profile.data && profile.data.skills) {
     const skills = profile.data.skills;
     for (const skillName in skills) {
       const skill = skills[skillName];
-      const percentage = skill.xpToNextLevel > 0 ? (skill.currentXP / skill.xpToNextLevel) * 100 : 0;
-      const textContent = `${formatNumber(skill.currentXP)} / ${formatNumber(skill.xpToNextLevel)}`;
+      const percentage = skill.xp_to_next_level > 0 ? (skill.current_xp / skill.xp_to_next_level) * 100 : 0;
+      const textContent = `${formatNumber(skill.current_xp)} / ${formatNumber(skill.xp_to_next_level)}`;
       const skillHTML = `
           <div class="skill">
               <div class="skill-name"><span>${skillName}</span><span>Level: ${skill.level}</span></div>
@@ -128,7 +232,11 @@ function renderSkills() {
 
 function renderInventory() {
   inventoryContainer.innerHTML = "";
-  const profile = gameState.profiles[gameState.selectedProfileIndex];
+  const profile = gameState.profiles[gameState.selected_profile_index];
+    if (profile.status === 'corrupt') {
+      inventoryContainer.innerHTML = "<p>This profile is corrupt. Inventory cannot be displayed.</p>";
+      return;
+  }
   if (profile && profile.data && profile.data.inventory && Object.keys(profile.data.inventory).length > 0) {
     for (const [itemName, quantity] of Object.entries(profile.data.inventory)) {
       inventoryContainer.innerHTML += `<div class="resource-display"><span>${itemName}: </span><span id="${itemName.toLowerCase()}">${quantity}</span></div>`;
@@ -139,8 +247,32 @@ function renderInventory() {
 }
 
 function renderRecentlyObtained() {
-    recentlyObtainedContainer.innerHTML = "<p>No new items recently.</p>";
+    let hasGains = false;
+    let content = "";
+    for (const [skill, xp] of Object.entries(recentGains.xp)) {
+        if (xp > 0) {
+            hasGains = true;
+            content += `<div class="gain-display">+${xp} ${skill} XP</div>`;
+        }
+    }
+    for (const [item, quantity] of Object.entries(recentGains.items)) {
+        if (quantity > 0) {
+            hasGains = true;
+            content += `<div class="gain-display">+${quantity} ${item}</div>`;
+        }
+    }
+
+    recentlyObtainedContainer.innerHTML = content;
+
+    if (hasGains) {
+        recentlyObtainedContainer.classList.add("visible");
+        recentlyObtainedContainer.style.maxHeight = recentlyObtainedContainer.scrollHeight + "px";
+    } else {
+        recentlyObtainedContainer.classList.remove("visible");
+        recentlyObtainedContainer.style.maxHeight = "0";
+    }
 }
+
 
 // --- EVENT LISTENERS ---
 async function handleAction(event) {
@@ -148,16 +280,37 @@ async function handleAction(event) {
   const newState = await fetchApi("/api/action", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ actionId }),
+    body: JSON.stringify({ action_id: actionId }),
   });
   if (newState) {
-    gameState = newState;
-    renderAll();
+    // Aggregate gains
+    if (newState.recent_gain) {
+        const gain = newState.recent_gain;
+        if (gain.skill && gain.xp) {
+            recentGains.xp[gain.skill] = (recentGains.xp[gain.skill] || 0) + gain.xp;
+        }
+        if (gain.item && gain.quantity) {
+            recentGains.items[gain.item] = (recentGains.items[gain.item] || 0) + gain.quantity;
+        }
+    }
+
+    // Reset the fade-out timer
+    clearTimeout(gainsTimeout);
+    gainsTimeout = setTimeout(() => {
+        recentGains = { xp: {}, items: {} };
+        renderRecentlyObtained();
+    }, 3000); // Hide after 3 seconds of inactivity
+
+    renderAll(newState);
   }
 }
 
 ["gather-wood-button", "mine-stone-button", "forage-herbs-button"].forEach(id => {
   document.getElementById(id).addEventListener("click", handleAction);
+});
+
+migrateProfileButton.addEventListener('click', async () => {
+    await fetchApi("/api/profile/migrate", { method: "POST" });
 });
 
 newProfileButton.addEventListener("click", () => {
@@ -169,15 +322,14 @@ newProfileButton.addEventListener("click", () => {
         body: JSON.stringify({ name: newName.trim() }),
       });
       if (newState) {
-        gameState = newState;
-        renderAll();
+        renderAll(newState);
       }
     }
   });
 });
 
 renameProfileButton.addEventListener("click", () => {
-  const currentProfile = gameState.profiles[gameState.selectedProfileIndex];
+  const currentProfile = gameState.profiles[gameState.selected_profile_index];
   showInputModal("Rename Profile", `Enter a new name for "${currentProfile.name}":`, async (newName) => {
     if (newName && newName.trim() !== "") {
       const newState = await fetchApi("/api/profile/rename", {
@@ -186,8 +338,7 @@ renameProfileButton.addEventListener("click", () => {
         body: JSON.stringify({ name: newName.trim() }),
       });
       if (newState) {
-        gameState = newState;
-        renderAll();
+        renderAll(newState);
       }
     }
   }, currentProfile.name);
@@ -195,10 +346,10 @@ renameProfileButton.addEventListener("click", () => {
 
 deleteProfileButton.addEventListener("click", () => {
   if (gameState.profiles.length <= 1) {
-    showAlert("You cannot delete the last profile.");
+    showAlert("Action Blocked", "You cannot delete the last profile.");
     return;
   }
-  const currentProfile = gameState.profiles[gameState.selectedProfileIndex];
+  const currentProfile = gameState.profiles[gameState.selected_profile_index];
   const confirmPhrase = `delete ${currentProfile.name}`;
   showInputModal(
     "Delete Profile",
@@ -207,12 +358,11 @@ deleteProfileButton.addEventListener("click", () => {
       if (inputValue === confirmPhrase) {
         const newState = await fetchApi("/api/profile/delete", { method: "DELETE" });
         if (newState) {
-          gameState = newState;
-          renderAll();
-          showAlert(`Profile "${currentProfile.name}" has been deleted.`);
+            renderAll(newState);
+            showAlert("Success", `Profile "${currentProfile.name}" has been deleted.`);
         }
       } else {
-        showAlert("The text you entered did not match. Action cancelled.");
+        showAlert("Action Cancelled", "The text you entered did not match.");
       }
     }
   );
@@ -227,37 +377,53 @@ hardResetButton.addEventListener("click", () => {
             if (inputValue === confirmPhrase) {
                 const newState = await fetchApi("/api/hard-reset", { method: "POST" });
                 if (newState) {
-                    gameState = newState;
-                    renderAll();
-                    showAlert("All game data has been reset.");
+                    renderAll(newState);
+                    showAlert("Success", "All game data has been reset.");
                 }
             } else {
-                showAlert("The text you entered did not match. Action cancelled.");
+                showAlert("Action Cancelled", "The text you entered did not match.");
             }
         }
     );
 });
 
-resetProfileButton.addEventListener("click", () => {
-    const currentProfile = gameState.profiles[gameState.selectedProfileIndex];
-    const confirmPhrase = `reset ${currentProfile.name}`;
-    showInputModal(
-        "Reset Profile",
-        `This action cannot be undone. To confirm, please type "${confirmPhrase}" in the box below.`,
-        async (inputValue) => {
-            if (inputValue === confirmPhrase) {
-                const newState = await fetchApi("/api/profile/reset", { method: "POST" });
-                if (newState) {
-                    gameState = newState;
-                    renderAll();
-                    showAlert(`Profile "${currentProfile.name}" has been reset.`);
-                }
-            } else {
-                showAlert("The text you entered did not match. Action cancelled.");
+resetProfileButton.addEventListener("click", async () => {
+    const selectedIndex = gameState.selected_profile_index;
+    const currentProfile = gameState.profiles[selectedIndex];
+
+    if (currentProfile.status === 'corrupt') {
+        const confirmText = `This will reset the corrupt profile "${currentProfile.name}" to a new, empty state. Your other profiles will not be affected. Are you sure?`;
+        showConfirmation("Confirm Profile Fix", confirmText, async () => {
+            const newState = await fetchApi("/api/profile/fix", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ index: selectedIndex }),
+            });
+            if (newState) {
+                renderAll(newState);
+                showAlert("Success", `Profile "${currentProfile.name}" has been fixed and reset.`);
             }
-        }
-    );
+        });
+    } else {
+        const confirmPhrase = `reset ${currentProfile.name}`;
+        showInputModal(
+            "Reset Profile",
+            `This action cannot be undone. To confirm, please type "${confirmPhrase}" in the box below.`,
+            async (inputValue) => {
+                if (inputValue === confirmPhrase) {
+                    const newState = await fetchApi("/api/profile/reset", { method: "POST" });
+                    if (newState) {
+                        renderAll(newState);
+                        showAlert("Success", `Profile "${currentProfile.name}" has been reset.`);
+                    }
+                } else {
+                    showAlert("Action Cancelled", "The text you entered did not match.");
+                }
+            }
+        );
+    }
 });
+
 
 resetSettingsButton.addEventListener("click", () => {
     const confirmPhrase = "reset settings";
@@ -271,7 +437,7 @@ resetSettingsButton.addEventListener("click", () => {
                 localStorage.removeItem("fontSize");
                 window.location.reload();
             } else {
-                showAlert("The text you entered did not match. Action cancelled.");
+                showAlert("Action Cancelled", "The text you entered did not match.");
             }
         }
     );
@@ -292,10 +458,14 @@ document.getElementById("font-selector").addEventListener("click", (event) => to
 
 
 document.addEventListener("click", (e) => {
+  // Add a defensive check to ensure the event target exists
+  if (!e.target) return;
+  
   if (!e.target.closest(".custom-dropdown")) {
     document.querySelectorAll(".custom-dropdown-options.show").forEach((options) => {
       const dropdown = options.closest(".custom-dropdown");
       if (dropdown) {
+        // Correctly select the arrow and flip its state
         const arrow = dropdown.querySelector(".dropdown-arrow");
         options.classList.remove("show");
         if (arrow) arrow.classList.remove("open");
@@ -415,13 +585,15 @@ function renderThemeOptions() {
 
 // --- MODALS (Confirmation, Alert, Input) ---
 const confirmationModal = document.getElementById("confirmation-modal");
+const modalTitle = document.getElementById("modal-title");
 const modalText = document.getElementById("modal-text");
 const modalConfirmButton = document.getElementById("modal-confirm-button");
 const modalCancelButton = document.getElementById("modal-cancel-button");
 
 let onConfirmCallback = null;
 
-function showConfirmation(text, onConfirm) {
+function showConfirmation(title, text, onConfirm) {
+  modalTitle.textContent = title;
   modalText.textContent = text;
   onConfirmCallback = onConfirm;
   modalConfirmButton.textContent = "Confirm";
@@ -429,7 +601,8 @@ function showConfirmation(text, onConfirm) {
   confirmationModal.style.display = "flex";
 }
 
-function showAlert(text) {
+function showAlert(title, text) {
+    modalTitle.textContent = title;
     modalText.textContent = text;
     onConfirmCallback = null; // No action on confirm, just close
     modalConfirmButton.textContent = "OK";
@@ -486,7 +659,7 @@ inputModalField.addEventListener("keyup", (event) => {
 
 
 // --- INITIAL LOAD ---
-async function initialize() {
+document.addEventListener("DOMContentLoaded", async () => {
   // Theme
   const savedTheme = localStorage.getItem("selectedTheme");
   if (savedTheme) {
@@ -518,13 +691,12 @@ async function initialize() {
   // Game State
   const initialState = await fetchApi("/api/game-state");
   if (initialState) {
-    gameState = initialState;
-    renderAll();
+    renderAll(initialState);
+    
     loadingOverlay.style.display = "none";
     mainContainer.style.display = "flex";
+    triggerWelcomeHighlight();
   } else {
     loadingOverlay.innerHTML = `<div class="loading-text">Error: Could not connect to the game server. Please try again later.</div>`;
   }
-}
-
-initialize();
+});
