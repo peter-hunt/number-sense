@@ -11,6 +11,36 @@
   --button-border: #555;
   --button-hover-bg: #444;
   --dropdown-bg: #252526;
+  --font-family: "Courier New", Courier, monospace;
+  --font-size: 16px;
+}
+[data-theme="gothic"] {
+    --body-bg: #1a1a1a;
+    --body-color: #ffffff;
+    --container-border: #4b0000;
+    --left-column-bg: #0d0d0d;
+    --middle-column-bg: #1a1a1a;
+    --column-border: #4b0000;
+    --h2-color: #ff0000;
+    --button-bg: #330000;
+    --button-color: #ffffff;
+    --button-border: #660000;
+    --button-hover-bg: #660000;
+    --dropdown-bg: #0d0d0d;
+}
+[data-theme="pink"] {
+    --body-bg: #ffe6f2;
+    --body-color: #333333;
+    --container-border: #ff99cc;
+    --left-column-bg: #ffffff;
+    --middle-column-bg: #ffffff;
+    --column-border: #ff99cc;
+    --h2-color: #ff66b3;
+    --button-bg: #ffcce6;
+    --button-color: #333333;
+    --button-border: #ff99cc;
+    --button-hover-bg: #ffb3d9;
+    --dropdown-bg: #ffffff;
 }
 [data-theme="light"] {
     --body-bg: #f0f0f0;
@@ -181,8 +211,24 @@
     --dropdown-bg: #21252b;
 }
 
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--body-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  font-size: 1.5em;
+  color: var(--h2-color);
+}
+
 body {
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
   background-color: var(--body-bg);
   color: var(--body-color);
   margin: 0;
@@ -280,6 +326,16 @@ h2 {
   background-color: var(--button-hover-bg);
 }
 
+#settings .setting-option button.danger-zone-button {
+    background-color: #a00 !important;
+    color: #fff !important;
+    border: 1px solid #c00 !important;
+}
+
+#settings .setting-option button.danger-zone-button:hover {
+    background-color: #c00 !important;
+}
+
 .custom-dropdown {
   position: relative;
   margin-bottom: 10px;
@@ -332,6 +388,10 @@ h2 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
 }
+#font-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
 .custom-dropdown-options.show {
   transform: scaleY(1);
   opacity: 1;
@@ -374,15 +434,36 @@ h2 {
     width: 0%; /* Default width */
     transition: width 0.3s ease-in-out;
 }
+
 .skill-text {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: var(--body-color);
     font-size: 12px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
+
+.skill-text-foreground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #1e1e1e; /* Or a dark color from the theme */
+    font-size: 12px;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
+    clip-path: inset(0 100% 0 0); /* This is the magic part */
+}
+
 
 .modal-overlay {
   position: fixed;
@@ -411,6 +492,17 @@ h2 {
     margin-top: 0;
 }
 
+#input-modal-field {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    background-color: var(--button-bg);
+    color: var(--button-color);
+    border: 1px solid var(--button-border);
+    font-family: inherit;
+}
+
 .modal-buttons {
   margin-top: 20px;
   display: flex;
@@ -430,4 +522,40 @@ h2 {
 
 .modal-buttons button:hover {
   background-color: var(--button-hover-bg);
+}
+
+/* --- FONT SIZE SLIDER --- */
+#font-size-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  background: var(--button-bg);
+  border: 1px solid var(--button-border);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+#font-size-slider:hover {
+  opacity: 1;
+}
+
+#font-size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--h2-color);
+  cursor: pointer;
+  border: 1px solid var(--button-border);
+}
+
+#font-size-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--h2-color);
+  cursor: pointer;
+  border: 1px solid var(--button-border);
 }

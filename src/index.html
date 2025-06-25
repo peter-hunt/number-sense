@@ -4,15 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Number Sense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inconsolata&family=Roboto+Mono&family=Source+Code+Pro&family=Space+Mono&family=Ubuntu+Mono&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container">
+    <div id="loading-overlay">
+      <div class="loading-text">Loading...</div>
+    </div>
+
+    <div class="container" style="display: none">
       <div class="column left-column">
         <h2>Navigation</h2>
         <div class="tab-button active" data-tab="home">Home</div>
         <div class="tab-button" data-tab="collect">Collect</div>
         <div class="tab-button" data-tab="combat">Combat</div>
+        <div class="tab-button" data-tab="inventory">Inventory</div>
         <div class="tab-button" data-tab="upgrades">Upgrades</div>
         <div class="tab-button" data-tab="skills">Skills</div>
         <div class="tab-button" data-tab="settings">Settings</div>
@@ -29,20 +40,34 @@
         <div id="collect" class="tab-content">
           <h2>Collect</h2>
           <p>Gather materials to craft items and build your empire.</p>
-          <button class="action-button">Gather Wood</button>
-          <button class="action-button">Mine Stone</button>
-          <button class="action-button">Forage for Herbs</button>
+          <button class="action-button" id="gather-wood-button">
+            Gather Wood
+          </button>
+          <button class="action-button" id="mine-stone-button">
+            Mine Stone
+          </button>
+          <button class="action-button" id="forage-herbs-button">
+            Forage for Herbs
+          </button>
         </div>
         <div id="combat" class="tab-content">
           <h2>Combat</h2>
           <p>Battle monsters to gain experience and find loot.</p>
-          <button class="action-button">Find a weak monster</button>
-          <button class="action-button">Explore the dark cave</button>
+          <button class="action-button" id="find-weak-monster-button">
+            Find a weak monster
+          </button>
+          <button class="action-button" id="explore-dark-cave-button">
+            Explore the dark cave
+          </button>
+        </div>
+        <div id="inventory" class="tab-content">
+          <h2>Inventory</h2>
+          <div id="inventory-container"></div>
         </div>
         <div id="upgrades" class="tab-content">
           <h2>Upgrades</h2>
           <p>Purchase upgrades to improve your resource generation.</p>
-          <button class="action-button">
+          <button class="action-button" id="upgrade-gold-gain-button">
             Upgrade Gold Gain (Cost: 100 Wood)
           </button>
         </div>
@@ -70,15 +95,21 @@
             <button id="delete-profile-button">Delete Current Profile</button>
           </div>
           <div class="setting-option">
-            <label>Save Profile</label>
-            <button id="save-profile-button">Save Profile</button>
+            <label for="font-selector">Font</label>
+            <div class="custom-dropdown">
+              <div class="custom-dropdown-selected" id="font-selector">
+                <span id="font-selected-label"></span>
+                <span class="dropdown-arrow"></span>
+              </div>
+              <div class="custom-dropdown-options" id="font-options"></div>
+            </div>
           </div>
           <div class="setting-option">
-             <label>Danger Zone</label>
-            <button id="hard-reset-button">Hard Reset</button>
+            <label for="font-size-slider">Font Size: <span id="font-size-value">16px</span></label>
+            <input type="range" id="font-size-slider" min="12" max="24" value="16">
           </div>
           <div class="setting-option">
-            <label for="color-theme">Color Theme</label>
+            <label for="theme-selector">Color Theme</label>
             <div class="custom-dropdown">
               <div class="custom-dropdown-selected" id="theme-selector">
                 <span id="theme-selected-label"></span>
@@ -87,21 +118,24 @@
               <div class="custom-dropdown-options" id="theme-options"></div>
             </div>
           </div>
+          <div class="setting-option">
+            <label>Danger Zone</label>
+            <button id="reset-profile-button" class="danger-zone-button">Reset Current Profile</button>
+            <button id="reset-settings-button" class="danger-zone-button">Reset Settings</button>
+            <button id="hard-reset-button" class="danger-zone-button">Reset All Game Data</button>
+          </div>
         </div>
       </div>
       <div class="column right-column">
-        <h2>Stats & Resources</h2>
+        <h2>Recently Obtained</h2>
+        <div id="recently-obtained-container">
+            <p>No new items recently.</p>
+        </div>
+        <hr>
+        <h2>Stats</h2>
         <div class="stat-display">
           <span>Profile: </span><span id="current-profile-name"></span>
         </div>
-        <hr />
-        <div class="resource-display">
-          <span>Gold: </span><span id="gold">0</span>
-        </div>
-        <div class="resource-display">
-          <span>Wood: </span><span id="wood">0</span>
-        </div>
-        <hr />
         <div class="stat-display">
           <span>Strength: </span><span id="strength">1</span>
         </div>
@@ -110,13 +144,24 @@
         </div>
       </div>
     </div>
-    <div id="confirmation-modal" class="modal-overlay" style="display: none;">
+    <div id="confirmation-modal" class="modal-overlay" style="display: none">
       <div class="modal-content">
         <h2 id="modal-title">Confirm Action</h2>
         <p id="modal-text"></p>
         <div class="modal-buttons">
           <button id="modal-confirm-button">Confirm</button>
           <button id="modal-cancel-button">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="input-modal" class="modal-overlay" style="display: none">
+      <div class="modal-content">
+        <h2 id="input-modal-title">Enter Value</h2>
+        <p id="input-modal-text"></p>
+        <input type="text" id="input-modal-field" />
+        <div class="modal-buttons">
+          <button id="input-modal-confirm-button">Confirm</button>
+          <button id="input-modal-cancel-button">Cancel</button>
         </div>
       </div>
     </div>

@@ -1,1 +1,20 @@
-.venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+venv.bak/
+
+# Local data
+database.json
+to-ask-gemini.txt

@@ -1,0 +1,26 @@
+{
+  "profiles": [
+    {
+      "name": "Adventurer",
+      "data": {
+        "skills": {
+          "Woodcutting": {
+            "totalXP": 0
+          },
+          "Mining": {
+            "totalXP": 0
+          },
+          "Foraging": {
+            "totalXP": 0
+          }
+        },
+        "inventory": {
+          "Wood": 0,
+          "Stone": 0,
+          "Herbs": 0
+        }
+      }
+    }
+  ],
+  "selectedProfileIndex": 0
+}
