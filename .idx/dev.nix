@@ -27,6 +27,7 @@
       enable = true;
       previews = {
         web = {
+          # The command now simply runs the script, which handles everything.
           command = [ "./devserver.sh" ];
           env = { PORT = "$PORT"; };
           manager = "web";

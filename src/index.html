@@ -26,6 +26,7 @@
         <div class="tab-button" data-tab="inventory">Inventory</div>
         <div class="tab-button" data-tab="upgrades">Upgrades</div>
         <div class="tab-button" data-tab="skills">Skills</div>
+        <div class="tab-button" data-tab="stats">Stats</div>
         <div class="tab-button" data-tab="settings">Settings</div>
       </div>
       <div class="column middle-column">
@@ -76,12 +77,25 @@
           <p>Level up your skills to unlock new abilities.</p>
           <div id="skills-container"></div>
         </div>
+        <div id="stats" class="tab-content">
+          <h2>Stats</h2>
+          <p>
+            Your stats are determined by your skill levels. Here is a detailed
+            breakdown of what each stat affects.
+          </p>
+          <div id="stats-container"></div>
+        </div>
         <div id="settings" class="tab-content">
           <h2>Settings</h2>
-          <div class="setting-option migration-controls" style="display: none;">
+          <div class="setting-option migration-controls" style="display: none">
             <label>Profile Migration</label>
-            <p>Your profile data may be outdated. You can attempt to migrate it to the latest version.</p>
-            <button id="migrate-profile-button">Attempt to Migrate Profile</button>
+            <p>
+              Your profile data may be outdated. You can attempt to migrate it
+              to the latest version.
+            </p>
+            <button id="migrate-profile-button">
+              Attempt to Migrate Profile
+            </button>
           </div>
           <div class="setting-option">
             <label>Profile</label>
@@ -125,28 +139,27 @@
           </div>
           <div class="setting-option">
             <label>Danger Zone</label>
-            <button id="reset-profile-button" class="danger-zone-button">Reset Current Profile</button>
-            <button id="reset-settings-button" class="danger-zone-button">Reset Settings</button>
-            <button id="hard-reset-button" class="danger-zone-button">Reset All Game Data</button>
+            <button id="reset-profile-button" class="danger-zone-button">
+              Reset Current Profile
+            </button>
+            <button id="reset-settings-button" class="danger-zone-button">
+              Reset Settings
+            </button>
+            <button id="hard-reset-button" class="danger-zone-button">
+              Reset All Game Data
+            </button>
           </div>
         </div>
       </div>
       <div class="column right-column">
+        <div id="sidebar-profile-name"></div>
         <h2>Recently Obtained</h2>
         <div id="recently-obtained-container">
-            <p>No new items recently.</p>
+          <p>No new items recently.</p>
         </div>
-        <hr>
+        <hr />
         <h2>Stats</h2>
-        <div class="stat-display">
-          <span>Profile: </span><span id="current-profile-name"></span>
-        </div>
-        <div class="stat-display">
-          <span>Strength: </span><span id="strength">1</span>
-        </div>
-        <div class="stat-display">
-          <span>Intelligence: </span><span id="intelligence">1</span>
-        </div>
+        <div id="right-stats-container"></div>
       </div>
     </div>
     <div id="confirmation-modal" class="modal-overlay" style="display: none">

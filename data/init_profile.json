@@ -1,0 +1,12 @@
+{
+  "skills": {
+    "woodcutting": 0,
+    "mining": 0,
+    "foraging": 0
+  },
+  "inventory": {
+    "wood": 0,
+    "stone": 0,
+    "herbs": 0
+  }
+}

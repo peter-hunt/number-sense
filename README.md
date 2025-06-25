@@ -5,21 +5,21 @@
 
 A simple idle game built with Flask and vanilla JavaScript.
 
-## Getting Started (with Nix)
+## Getting Started
 
-This project is configured to work with Nix, which manages the development environment. The required Python packages are defined in `.idx/dev.nix` and are automatically made available.
+This project is configured to work seamlessly with Project IDX and its Nix-based environment.
 
-To start the server, simply run:
+To start the development server, simply run the provided script:
 
 ```bash
 ./devserver.sh
 ```
 
-This will start the Flask application on port 8080.
+This will install any necessary dependencies and start the Flask application. The server will run on the port specified by the `$PORT` environment variable, defaulting to 8080. The Project IDX preview manager will automatically handle starting and stopping this script.
 
-## Getting Started (Manual Setup)
+## Manual Setup (without Project IDX)
 
-For a traditional setup, you can use a Python virtual environment.
+If you are not using the Nix environment provided by Project IDX, you can set up the project manually using a Python virtual environment.
 
 ### 1. Create and Activate the Virtual Environment
 
@@ -52,7 +52,6 @@ pip install -r requirements.txt
 With the dependencies installed, you can start the Flask server directly:
 
 ```bash
-python main.py
+export FLASK_APP=main.py
+flask run --host=0.0.0.0 --port=8080
 ```
-
-The application will be running on `http://127.0.0.1:8080`.
