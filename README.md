@@ -1,5 +1,8 @@
 # Number Sense Idle Game
 
+[![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC_BY--SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
+[![Built with Flask](https://img.shields.io/badge/Built%20with-Flask-000000.svg?&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+
 A simple idle game built with Flask and vanilla JavaScript.
 
 ## Getting Started (with Nix)
