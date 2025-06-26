@@ -1,4 +1,4 @@
-# Gemini Assistant Project Notes
+# AI Notes
 
 ## User's Architectural Vision
 

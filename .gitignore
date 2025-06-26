@@ -1,6 +1,14 @@
+# Python cache and environments
 __pycache__/
+.venv/
+venv/
+
+# VS Code settings
+.vscode/
+
+# User and runtime data
 profiles/*.json
+# Ignore user-specific settings
+/data/settings.json
+
 to-ask-gemini.txt
-.venv
-venv
-.vscode

@@ -103,6 +103,15 @@ async function fetchApi(endpoint, options = {}) {
   }
 }
 
+// --- SETTINGS API ---
+async function saveSettings(partial) {
+  await fetch("/api/settings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(partial),
+  });
+}
+
 // --- RENDER & UI UPDATE FUNCTIONS ---
 function renderAll(newState) {
   if (!newState || !newState.profiles || newState.profiles.length === 0) {
@@ -626,7 +635,7 @@ const fontOptions = document.getElementById("font-options");
 function applyFont() {
   const font = fonts[selectedFontIndex].value;
   document.documentElement.style.setProperty("--font-family", font);
-  localStorage.setItem("selectedFont", font);
+  saveSettings({ font });
 }
 
 function updateFontDisplay() {
@@ -662,7 +671,7 @@ function applyFontSize() {
     "--font-size",
     `${currentFontSize}px`
   );
-  localStorage.setItem("fontSize", currentFontSize);
+  saveSettings({ font_size: currentFontSize });
 }
 
 function updateFontSizeDisplay() {
@@ -702,7 +711,7 @@ const themeOptions = document.getElementById("theme-options");
 function applyTheme() {
   const theme = themes[selectedThemeIndex].value;
   document.body.dataset.theme = theme;
-  localStorage.setItem("selectedTheme", theme);
+  saveSettings({ theme });
 }
 
 function updateThemeDisplay() {
@@ -720,7 +729,7 @@ function renderThemeOptions() {
       e.stopPropagation();
       selectedThemeIndex = index;
       updateThemeDisplay();
-      applyFont();
+      applyTheme();
       toggleDropdown(e.currentTarget.closest(".custom-dropdown"));
     });
     themeOptions.appendChild(item);
@@ -807,30 +816,33 @@ inputModalField.addEventListener("keyup", (event) => {
 
 // --- INITIAL LOAD ---
 document.addEventListener("DOMContentLoaded", async () => {
+  // Settings
+  let settings = {};
+  try {
+    const resp = await fetch("/api/settings");
+    if (resp.ok) {
+      settings = await resp.json();
+    }
+  } catch (e) {}
   // Theme
-  const savedTheme = localStorage.getItem("selectedTheme");
-  if (savedTheme) {
-    const savedThemeIndex = themes.findIndex((t) => t.value === savedTheme);
+  if (settings.theme) {
+    const savedThemeIndex = themes.findIndex((t) => t.value === settings.theme);
     if (savedThemeIndex !== -1) selectedThemeIndex = savedThemeIndex;
   }
   renderThemeOptions();
   updateThemeDisplay();
   applyTheme();
-
   // Font
-  const savedFont = localStorage.getItem("selectedFont");
-  if (savedFont) {
-    const savedFontIndex = fonts.findIndex((f) => f.value === savedFont);
+  if (settings.font) {
+    const savedFontIndex = fonts.findIndex((f) => f.value === settings.font);
     if (savedFontIndex !== -1) selectedFontIndex = savedFontIndex;
   }
   renderFontOptions();
   updateFontDisplay();
   applyFont();
-
   // Font Size
-  const savedFontSize = localStorage.getItem("fontSize");
-  if (savedFontSize) {
-    currentFontSize = savedFontSize;
+  if (settings.font_size) {
+    currentFontSize = settings.font_size;
   }
   updateFontSizeDisplay();
   applyFontSize();

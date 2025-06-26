@@ -110,6 +110,23 @@ def hard_reset_route():
         return jsonify(result), 400
     return jsonify(result)
 
+
+@app.route('/api/settings', methods=['GET'])
+def get_settings_route():
+    """Returns all user settings from settings.json."""
+    settings = profile_manager.get_settings()
+    return jsonify(settings)
+
+
+@app.route('/api/settings', methods=['POST'])
+def set_settings_route():
+    """Sets user settings in settings.json."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No settings provided"}), 400
+    profile_manager.set_settings(data)
+    return jsonify({"success": True, **data})
+
 # --- Static File Serving ---
 
 

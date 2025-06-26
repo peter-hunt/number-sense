@@ -136,10 +136,41 @@ def get_selected_profile_name():
 
 
 def set_selected_profile_name(profile_name):
-    """Sets the selected profile name in settings."""
-    SETTINGS_FILE.write_text(json.dumps(
-        {"selected_profile_name": profile_name}))
+    """Sets the selected profile name in settings, preserving other settings."""
+    settings = {}
+    if SETTINGS_FILE.exists():
+        try:
+            settings = json.loads(SETTINGS_FILE.read_text())
+        except (IOError, json.JSONDecodeError):
+            settings = {}
+    settings["selected_profile_name"] = profile_name
+    SETTINGS_FILE.write_text(json.dumps(settings, indent=2))
 
+
+# --- Theme Management ---
+
+def get_theme():
+    """Gets the current theme from settings.json, or returns a default if not set."""
+    if not SETTINGS_FILE.exists():
+        return "dark"
+    try:
+        settings = json.loads(SETTINGS_FILE.read_text())
+        return settings.get("theme", "dark")
+    except (IOError, json.JSONDecodeError):
+        return "dark"
+
+
+def set_theme(theme):
+    """Sets the theme in settings.json, preserving other settings."""
+    settings = {}
+    if SETTINGS_FILE.exists():
+        try:
+            settings = json.loads(SETTINGS_FILE.read_text())
+        except (IOError, json.JSONDecodeError):
+            settings = {}
+    settings["theme"] = theme
+    SETTINGS_FILE.write_text(json.dumps(settings, indent=2))
+    return True
 
 # --- Core Game Logic ---
 
@@ -337,3 +368,36 @@ def hard_reset():
     new_profile("Adventurer")
 
     return get_processed_game_state()
+
+
+def get_settings():
+    """Get all user settings from settings.json, with defaults."""
+    defaults = {
+        "theme": "dark",
+        "font": "Courier New",
+        "font_size": 16,
+        # selected_profile_name is handled elsewhere
+    }
+    if not SETTINGS_FILE.exists():
+        return defaults
+    try:
+        settings = json.loads(SETTINGS_FILE.read_text())
+        for k, v in defaults.items():
+            if k not in settings:
+                settings[k] = v
+        return settings
+    except (IOError, json.JSONDecodeError):
+        return defaults
+
+
+def set_settings(new_settings):
+    """Update settings.json with provided settings, preserving others."""
+    settings = {}
+    if SETTINGS_FILE.exists():
+        try:
+            settings = json.loads(SETTINGS_FILE.read_text())
+        except (IOError, json.JSONDecodeError):
+            settings = {}
+    settings.update(new_settings)
+    SETTINGS_FILE.write_text(json.dumps(settings, indent=2))
+    return True
