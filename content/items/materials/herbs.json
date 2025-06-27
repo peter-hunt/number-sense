@@ -1,0 +1,7 @@
+{
+  "id": "herbs",
+  "name": "Herbs",
+  "description": "A bundle of useful plants for potions and remedies.",
+  "type": "material",
+  "value": 2
+}

@@ -1,0 +1,7 @@
+{
+  "id": "wood",
+  "name": "Wood",
+  "description": "A versatile material used for crafting and building.",
+  "type": "material",
+  "value": 1
+}

@@ -1,0 +1,7 @@
+{
+  "id": "stone",
+  "name": "Stone",
+  "description": "A basic building material, sturdy and common.",
+  "type": "material",
+  "value": 1
+}
