@@ -11,3 +11,6 @@ venv/
 profiles/*.json
 # Ignore user-specific settings
 /data/settings.json
+
+# Ignore temporary files
+.DS_Store

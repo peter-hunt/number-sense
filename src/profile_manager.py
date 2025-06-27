@@ -3,8 +3,6 @@ from json import JSONDecodeError, dumps as json_dumps, loads as json_loads
 from math import floor
 from pathlib import Path
 
-type Number = int | float
-
 # --- Constants ---
 PROFILES_DIR = Path("profiles")
 SETTINGS_FILE = Path("data", "settings.json")
@@ -55,14 +53,14 @@ def validate_profile_data(data):
     if not isinstance(skills, dict) or set(skills.keys()) != set(ALL_SKILLS):
         return False
     for total_xp in skills.values():
-        if not isinstance(total_xp, Number):
+        if not isinstance(total_xp, int | float):
             return False
 
     inventory = data["inventory"]
     if not isinstance(inventory, dict) or set(inventory.keys()) != set(ALL_ITEMS):
         return False
     for quantity in inventory.values():
-        if not isinstance(quantity, Number):
+        if not isinstance(quantity, int | float):
             return False
     return True
 

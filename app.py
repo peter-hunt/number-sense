@@ -1,3 +1,12 @@
+"""
+Usage:
+  app.py [--host=<host>] [--port=<port>]
+
+Options:
+  --host=<host>  Host to run the server on [default: 0.0.0.0]
+  --port=<port>  Port to run the server on [default: 8080]
+"""
+
 import sys
 
 # --- Python Version Check ---
@@ -11,6 +20,7 @@ if sys.version_info < (3, 12):
 
 
 # --- Flask Application Setup ---
+from docopt import docopt
 from flask import Flask, jsonify, request, send_from_directory
 from src import profile_manager
 import logging
@@ -155,9 +165,10 @@ def send_static_files(path):
 
 def main():
     """Main entry point for the Flask application."""
-    # The server is managed by devserver.sh, so this part is not directly run in that environment.
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    args = docopt(__doc__)
+    host = args["--host"] or os.environ.get("HOST", "127.0.0.1")
+    port = int(args["--port"] or os.environ.get("PORT", 5000))
+    app.run(host=host, port=port)
 
 
 if __name__ == "__main__":

@@ -5,33 +5,33 @@
 
 A prototype for a future browser-based MMORPG, built with Flask and vanilla JavaScript. This project explores core mechanics, persistence, and real-time features that could power a massively multiplayer online role-playing game.
 
-## Getting Started
+---
 
-This project is designed for rapid prototyping and experimentation, with a focus on extensibility for future MMORPG development.
+## Table of Contents
+
+- [Number Sense MMORPG Prototype](#number-sense-mmorpg-prototype)
+  - [Table of Contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+    - [Requirements](#requirements)
+    - [Setup](#setup)
+    - [Install Dependencies](#install-dependencies)
+    - [Run the Application](#run-the-application)
+      - [Local VSCode Preview](#local-vscode-preview)
+  - [Notes](#notes)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+---
+
+## Getting Started
 
 ### Requirements
 
 - Python 3.12 or higher
 
-### Local Nix Preview
+### Setup
 
-If you are using Project IDX or have Nix installed, you can preview the application in a reproducible environment. The provided `devserver.sh` script will automatically set up the environment and start the Flask server. This ensures all dependencies are managed and the app runs consistently across systems.
-
-To start the development server with Nix:
-
-```bash
-./devserver.sh
-```
-
-The server will run on the port specified by the `$PORT` environment variable (default: 8080). Project IDX's preview manager will handle starting and stopping the script, making it easy to iterate on your MMORPG prototype.
-
-## Manual Setup (without Project IDX or Nix)
-
-If you are not using the Nix environment, you can set up the project manually using a Python virtual environment.
-
-### 1. Create and Activate the Virtual Environment
-
-From the project's root directory, run the following commands. This will create a local environment in a `venv` folder, which is already ignored by `.gitignore`.
+Create and activate the virtual environment from the project's root directory:
 
 **On macOS / Linux:**
 
@@ -47,23 +47,52 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-### 2. Install Dependencies
+### Install Dependencies
 
-Once the virtual environment is active, install the required packages from the `requirements.txt` file:
+With the virtual environment active, install required packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run the Application
+### Run the Application
 
-With the dependencies installed, you can start the Flask server directly:
+You can start the Flask server using the Flask CLI:
 
 ```bash
-export FLASK_APP=main.py
-flask run --host=0.0.0.0 --port=8080
+flask run --host=127.0.0.1
 ```
+
+By default, the server runs on host 127.0.0.1 and port 5000. You can override the port with:
+
+```bash
+flask run --host=127.0.0.1 --port=<port>
+```
+
+Then, open your browser and navigate to [http://127.0.0.1:5000](http://127.0.0.1:5000) (or the port you specified).
+
+> **Note:** If port 5000 is already in use, Flask will display an error and not start the server. In that case, specify a different port with the `--port` option, for example:
+>
+> ```bash
+> flask run --host=127.0.0.1 --port=5001
+> ```
+
+#### Local VSCode Preview
+
+- In VSCode, use: Simple Browser: Show
+- Navigate to: [http://127.0.0.1:5000](http://127.0.0.1:5000) (or the port you specified)
 
 ---
 
-This project is an early-stage prototype for a web-based MMORPG. Contributions and feedback are welcome as the design and features evolve!
+## Notes
+
+- This project is an early-stage prototype for a web-based MMORPG.
+- Contributions and feedback are welcome as the design and features evolve!
+
+## Contributing
+
+Pull requests and suggestions are encouraged. Please open an issue or submit a PR to contribute.
+
+## License
+
+This project is licensed under the [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license.
