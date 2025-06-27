@@ -20,14 +20,16 @@
     <div class="container" style="display: none">
       <div class="column left-column">
         <h2>Navigation</h2>
-        <div class="tab-button active" data-tab="home">Home</div>
-        <div class="tab-button" data-tab="collect">Collect</div>
-        <div class="tab-button" data-tab="combat">Combat</div>
-        <div class="tab-button" data-tab="inventory">Inventory</div>
-        <div class="tab-button" data-tab="upgrades">Upgrades</div>
-        <div class="tab-button" data-tab="skills">Skills</div>
-        <div class="tab-button" data-tab="stats">Stats</div>
-        <div class="tab-button" data-tab="settings">Settings</div>
+        <div class="tab-button active unselectable" data-tab="home">Home</div>
+        <div class="tab-button unselectable" data-tab="collect">Collect</div>
+        <div class="tab-button unselectable" data-tab="combat">Combat</div>
+        <div class="tab-button unselectable" data-tab="inventory">
+          Inventory
+        </div>
+        <div class="tab-button unselectable" data-tab="upgrades">Upgrades</div>
+        <div class="tab-button unselectable" data-tab="skills">Skills</div>
+        <div class="tab-button unselectable" data-tab="stats">Stats</div>
+        <div class="tab-button unselectable" data-tab="settings">Settings</div>
       </div>
       <div class="column middle-column">
         <div id="home" class="tab-content active">
@@ -41,23 +43,29 @@
         <div id="collect" class="tab-content">
           <h2>Collect</h2>
           <p>Gather materials to craft items and build your empire.</p>
-          <button class="action-button" id="gather-wood-button">
+          <button class="action-button unselectable" id="gather-wood-button">
             Gather Wood
           </button>
-          <button class="action-button" id="mine-stone-button">
+          <button class="action-button unselectable" id="mine-stone-button">
             Mine Stone
           </button>
-          <button class="action-button" id="forage-herbs-button">
+          <button class="action-button unselectable" id="forage-herbs-button">
             Forage for Herbs
           </button>
         </div>
         <div id="combat" class="tab-content">
           <h2>Combat</h2>
           <p>Battle monsters to gain experience and find loot.</p>
-          <button class="action-button" id="find-weak-monster-button">
+          <button
+            class="action-button unselectable"
+            id="find-weak-monster-button"
+          >
             Find a weak monster
           </button>
-          <button class="action-button" id="explore-dark-cave-button">
+          <button
+            class="action-button unselectable"
+            id="explore-dark-cave-button"
+          >
             Explore the dark cave
           </button>
         </div>
@@ -68,7 +76,10 @@
         <div id="upgrades" class="tab-content">
           <h2>Upgrades</h2>
           <p>Purchase upgrades to improve your resource generation.</p>
-          <button class="action-button" id="upgrade-gold-gain-button">
+          <button
+            class="action-button unselectable"
+            id="upgrade-gold-gain-button"
+          >
             Upgrade Gold Gain (Cost: 100 Wood)
           </button>
         </div>
@@ -93,7 +104,7 @@
               Your profile data may be outdated. You can attempt to migrate it
               to the latest version.
             </p>
-            <button id="migrate-profile-button">
+            <button id="migrate-profile-button" class="unselectable">
               Attempt to Migrate Profile
             </button>
           </div>
@@ -109,9 +120,15 @@
           </div>
           <div class="setting-option">
             <label>Profile Management</label>
-            <button id="new-profile-button">New Profile</button>
-            <button id="rename-profile-button">Rename Current Profile</button>
-            <button id="delete-profile-button">Delete Current Profile</button>
+            <button id="new-profile-button" class="unselectable">
+              New Profile
+            </button>
+            <button id="rename-profile-button" class="unselectable">
+              Rename Current Profile
+            </button>
+            <button id="delete-profile-button" class="unselectable">
+              Delete Current Profile
+            </button>
           </div>
           <div class="setting-option">
             <label for="font-selector">Font</label>
@@ -124,8 +141,16 @@
             </div>
           </div>
           <div class="setting-option">
-            <label for="font-size-slider">Font Size: <span id="font-size-value">16px</span></label>
-            <input type="range" id="font-size-slider" min="12" max="24" value="16">
+            <label for="font-size-slider"
+              >Font Size: <span id="font-size-value">16px</span></label
+            >
+            <input
+              type="range"
+              id="font-size-slider"
+              min="12"
+              max="24"
+              value="16"
+            />
           </div>
           <div class="setting-option">
             <label for="theme-selector">Color Theme</label>
@@ -139,13 +164,22 @@
           </div>
           <div class="setting-option">
             <label>Danger Zone</label>
-            <button id="reset-profile-button" class="danger-zone-button">
+            <button
+              id="reset-profile-button"
+              class="danger-zone-button unselectable"
+            >
               Reset Current Profile
             </button>
-            <button id="reset-settings-button" class="danger-zone-button">
+            <button
+              id="reset-settings-button"
+              class="danger-zone-button unselectable"
+            >
               Reset Settings
             </button>
-            <button id="hard-reset-button" class="danger-zone-button">
+            <button
+              id="hard-reset-button"
+              class="danger-zone-button unselectable"
+            >
               Reset All Game Data
             </button>
           </div>
@@ -167,8 +201,10 @@
         <h2 id="modal-title">Confirm Action</h2>
         <p id="modal-text"></p>
         <div class="modal-buttons">
-          <button id="modal-confirm-button">Confirm</button>
-          <button id="modal-cancel-button">Cancel</button>
+          <button id="modal-confirm-button" class="unselectable">
+            Confirm
+          </button>
+          <button id="modal-cancel-button" class="unselectable">Cancel</button>
         </div>
       </div>
     </div>
@@ -178,8 +214,12 @@
         <p id="input-modal-text"></p>
         <input type="text" id="input-modal-field" />
         <div class="modal-buttons">
-          <button id="input-modal-confirm-button">Confirm</button>
-          <button id="input-modal-cancel-button">Cancel</button>
+          <button id="input-modal-confirm-button" class="unselectable">
+            Confirm
+          </button>
+          <button id="input-modal-cancel-button" class="unselectable">
+            Cancel
+          </button>
         </div>
       </div>
     </div>

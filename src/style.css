@@ -624,3 +624,36 @@ h2 {
   border-bottom: 1px solid var(--column-border);
   text-align: center;
 }
+
+/* Utility class for unselectable/unfocusable elements */
+.unselectable {
+  user-select: none;
+  outline: none !important;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+}
+.unselectable:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Make navigation, action, and modal buttons unselectable and unfocusable */
+.tab-button,
+.action-button,
+.modal-buttons button,
+#settings .setting-option button.danger-zone-button {
+  user-select: none;
+  outline: none !important;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto; /* Still clickable if needed */
+}
+
+.tab-button:focus,
+.action-button:focus,
+.modal-buttons button:focus,
+#settings .setting-option button.danger-zone-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}

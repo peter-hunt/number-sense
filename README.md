@@ -13,6 +13,7 @@ A prototype for a future browser-based MMORPG, built with Flask and vanilla Java
   - [Table of Contents](#table-of-contents)
   - [Getting Started](#getting-started)
     - [Requirements](#requirements)
+      - [Python Libraries](#python-libraries)
     - [Setup](#setup)
     - [Install Dependencies](#install-dependencies)
     - [Run the Application](#run-the-application)
@@ -28,6 +29,20 @@ A prototype for a future browser-based MMORPG, built with Flask and vanilla Java
 ### Requirements
 
 - Python 3.12 or higher
+
+#### Python Libraries
+
+The following libraries are required and listed in `requirements.txt`:
+
+- **flask**: Web framework for building the server and web application.
+- **docopt**: Command-line interface description language for parsing arguments.
+- **pydantic**: Data validation and settings management using Python type annotations.
+
+You can install all required libraries with pip:
+
+```bash
+pip install -r requirements.txt
+```
 
 ### Setup
 

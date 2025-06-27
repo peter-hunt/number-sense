@@ -3,6 +3,8 @@ from json import JSONDecodeError, dumps as json_dumps, loads as json_loads
 from math import floor
 from pathlib import Path
 
+from .profile_model import Profile
+
 # --- Constants ---
 PROFILES_DIR = Path("profiles")
 SETTINGS_FILE = Path("data", "settings.json")
@@ -38,31 +40,19 @@ SETTINGS_FILE.parent.mkdir(exist_ok=True)
 
 # --- Data Validation & Defaults ---
 def get_default_profile_data():
-    """Returns the default data for a single profile by copying the template."""
-    return deepcopy(INITIAL_PROFILE_TEMPLATE)
+    """Returns the default data for a single profile by copying the template, as a dict."""
+    return Profile(**deepcopy(INITIAL_PROFILE_TEMPLATE)).dict()
 
 
 def validate_profile_data(data):
     """
-    Performs a deep structural integrity check on a profile's data.
+    Performs a deep structural integrity check on a profile's data using the Profile model.
     """
-    if "skills" not in data or "inventory" not in data:
+    try:
+        Profile(**data)
+        return True
+    except Exception:
         return False
-
-    skills = data["skills"]
-    if not isinstance(skills, dict) or set(skills.keys()) != set(ALL_SKILLS):
-        return False
-    for total_xp in skills.values():
-        if not isinstance(total_xp, int | float):
-            return False
-
-    inventory = data["inventory"]
-    if not isinstance(inventory, dict) or set(inventory.keys()) != set(ALL_ITEMS):
-        return False
-    for quantity in inventory.values():
-        if not isinstance(quantity, int | float):
-            return False
-    return True
 
 
 # --- Profile & Settings I/O ---
@@ -72,24 +62,29 @@ def get_profile_list():
 
 
 def read_profile(profile_name):
-    """Reads and validates a single profile file."""
+    """Reads and validates a single profile file, returning a Profile instance if valid."""
     profile_file = PROFILES_DIR / f"{profile_name}.json"
     if not profile_file.exists():
         return None
     try:
         data = json_loads(profile_file.read_text())
         if validate_profile_data(data):
-            return {"name": profile_name, "data": data, "status": "ok"}
+            profile_obj = Profile(**data)
+            return {"name": profile_name, "data": profile_obj.dict(), "status": "ok"}
         else:
             return {"name": profile_name, "data": get_default_profile_data(), "status": "corrupt"}
-    except (IOError, JSONDecodeError):
+    except (IOError, JSONDecodeError, Exception):
         return {"name": profile_name, "data": get_default_profile_data(), "status": "corrupt"}
 
 
 def write_profile(profile_name, data):
-    """Writes data to a profile file."""
+    """Writes data to a profile file, ensuring it is valid via the Profile model."""
     profile_file = PROFILES_DIR / f"{profile_name}.json"
-    profile_file.write_text(json_dumps(data, indent=2))
+    # Validate and convert to dict if needed
+    if not isinstance(data, dict):
+        data = data.dict() if hasattr(data, 'dict') else dict(data)
+    profile_obj = Profile(**data)
+    profile_file.write_text(json_dumps(profile_obj.dict(), indent=2))
 
 
 def get_selected_profile_name():
