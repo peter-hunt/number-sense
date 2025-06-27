@@ -9,6 +9,10 @@ A prototype for a future browser-based MMORPG, built with Flask and vanilla Java
 
 This project is designed for rapid prototyping and experimentation, with a focus on extensibility for future MMORPG development.
 
+### Requirements
+
+- Python 3.12 or higher
+
 ### Local Nix Preview
 
 If you are using Project IDX or have Nix installed, you can preview the application in a reproducible environment. The provided `devserver.sh` script will automatically set up the environment and start the Flask server. This ensures all dependencies are managed and the app runs consistently across systems.

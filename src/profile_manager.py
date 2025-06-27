@@ -1,25 +1,25 @@
-import json
-import math
+from copy import deepcopy
+from json import JSONDecodeError, dumps as json_dumps, loads as json_loads
+from math import floor
 from pathlib import Path
-import copy
-import os
+
+type Number = int | float
 
 # --- Constants ---
-PROFILES_DIR = Path('profiles')
-SETTINGS_FILE = Path('data/settings.json')
-INIT_PROFILE_FILE = Path('data/init_profile.json')
+PROFILES_DIR = Path("profiles")
+SETTINGS_FILE = Path("data", "settings.json")
+INIT_PROFILE_FILE = Path("data", "init_profile.json")
 BASE_XP = 100
 XP_GROWTH_RATE = 1.15
 ALL_STATS = ["strength", "intelligence", "dexterity"]
 
+
 # --- Load Initial Data ---
-
-
 def load_initial_profile_template():
     """Loads the initial profile structure from the JSON file."""
     try:
-        return json.loads(INIT_PROFILE_FILE.read_text())
-    except (FileNotFoundError, json.JSONDecodeError):
+        return json_loads(INIT_PROFILE_FILE.read_text())
+    except (FileNotFoundError, JSONDecodeError):
         # Fallback to a hardcoded default if the file is missing or corrupt
         return {
             "skills": {"woodcutting": 0, "mining": 0, "foraging": 0},
@@ -29,50 +29,48 @@ def load_initial_profile_template():
 
 # Load the template once at startup
 INITIAL_PROFILE_TEMPLATE = load_initial_profile_template()
-ALL_SKILLS = list(INITIAL_PROFILE_TEMPLATE.get('skills', {}).keys())
-ALL_ITEMS = list(INITIAL_PROFILE_TEMPLATE.get('inventory', {}).keys())
+ALL_SKILLS = list(INITIAL_PROFILE_TEMPLATE.get("skills", {}).keys())
+ALL_ITEMS = list(INITIAL_PROFILE_TEMPLATE.get("inventory", {}).keys())
 
 
 # --- Initialization ---
 PROFILES_DIR.mkdir(exist_ok=True)
 SETTINGS_FILE.parent.mkdir(exist_ok=True)
 
+
 # --- Data Validation & Defaults ---
-
-
 def get_default_profile_data():
     """Returns the default data for a single profile by copying the template."""
-    return copy.deepcopy(INITIAL_PROFILE_TEMPLATE)
+    return deepcopy(INITIAL_PROFILE_TEMPLATE)
 
 
 def validate_profile_data(data):
     """
     Performs a deep structural integrity check on a profile's data.
     """
-    if 'skills' not in data or 'inventory' not in data:
+    if "skills" not in data or "inventory" not in data:
         return False
 
-    skills = data['skills']
+    skills = data["skills"]
     if not isinstance(skills, dict) or set(skills.keys()) != set(ALL_SKILLS):
         return False
     for total_xp in skills.values():
-        if not isinstance(total_xp, (int, float)):
+        if not isinstance(total_xp, Number):
             return False
 
-    inventory = data['inventory']
+    inventory = data["inventory"]
     if not isinstance(inventory, dict) or set(inventory.keys()) != set(ALL_ITEMS):
         return False
     for quantity in inventory.values():
-        if not isinstance(quantity, (int, float)):
+        if not isinstance(quantity, Number):
             return False
     return True
 
+
 # --- Profile & Settings I/O ---
-
-
 def get_profile_list():
     """Returns a list of profile names from the profiles directory."""
-    return [p.stem for p in PROFILES_DIR.glob('*.json')]
+    return [p.stem for p in PROFILES_DIR.glob("*.json")]
 
 
 def read_profile(profile_name):
@@ -81,19 +79,19 @@ def read_profile(profile_name):
     if not profile_file.exists():
         return None
     try:
-        data = json.loads(profile_file.read_text())
+        data = json_loads(profile_file.read_text())
         if validate_profile_data(data):
             return {"name": profile_name, "data": data, "status": "ok"}
         else:
             return {"name": profile_name, "data": get_default_profile_data(), "status": "corrupt"}
-    except (IOError, json.JSONDecodeError):
+    except (IOError, JSONDecodeError):
         return {"name": profile_name, "data": get_default_profile_data(), "status": "corrupt"}
 
 
 def write_profile(profile_name, data):
     """Writes data to a profile file."""
     profile_file = PROFILES_DIR / f"{profile_name}.json"
-    profile_file.write_text(json.dumps(data, indent=2))
+    profile_file.write_text(json_dumps(data, indent=2))
 
 
 def get_selected_profile_name():
@@ -109,8 +107,8 @@ def get_selected_profile_name():
         return profile_list[0]
 
     try:
-        settings = json.loads(SETTINGS_FILE.read_text())
-        selected_name = settings.get('selected_profile_name')
+        settings = json_loads(SETTINGS_FILE.read_text())
+        selected_name = settings.get("selected_profile_name")
         # Validate that the selected profile still exists
         if selected_name and (PROFILES_DIR / f"{selected_name}.json").exists():
             return selected_name
@@ -124,7 +122,7 @@ def get_selected_profile_name():
                 # If no profiles exist at all, create one
                 new_profile("Adventurer")
                 return "Adventurer"
-    except (IOError, json.JSONDecodeError):
+    except (IOError, JSONDecodeError):
         # If settings are corrupt, select the first profile
         profile_list = get_profile_list()
         if profile_list:
@@ -140,23 +138,22 @@ def set_selected_profile_name(profile_name):
     settings = {}
     if SETTINGS_FILE.exists():
         try:
-            settings = json.loads(SETTINGS_FILE.read_text())
-        except (IOError, json.JSONDecodeError):
+            settings = json_loads(SETTINGS_FILE.read_text())
+        except (IOError, JSONDecodeError):
             settings = {}
     settings["selected_profile_name"] = profile_name
-    SETTINGS_FILE.write_text(json.dumps(settings, indent=2))
+    SETTINGS_FILE.write_text(json_dumps(settings, indent=2))
 
 
 # --- Theme Management ---
-
 def get_theme():
     """Gets the current theme from settings.json, or returns a default if not set."""
     if not SETTINGS_FILE.exists():
         return "dark"
     try:
-        settings = json.loads(SETTINGS_FILE.read_text())
+        settings = json_loads(SETTINGS_FILE.read_text())
         return settings.get("theme", "dark")
-    except (IOError, json.JSONDecodeError):
+    except (IOError, JSONDecodeError):
         return "dark"
 
 
@@ -165,21 +162,21 @@ def set_theme(theme):
     settings = {}
     if SETTINGS_FILE.exists():
         try:
-            settings = json.loads(SETTINGS_FILE.read_text())
-        except (IOError, json.JSONDecodeError):
+            settings = json_loads(SETTINGS_FILE.read_text())
+        except (IOError, JSONDecodeError):
             settings = {}
     settings["theme"] = theme
-    SETTINGS_FILE.write_text(json.dumps(settings, indent=2))
+    SETTINGS_FILE.write_text(json_dumps(settings, indent=2))
     return True
 
-# --- Core Game Logic ---
 
+# --- Core Game Logic ---
 def get_level_from_xp(total_xp):
     level, xp_for_next_level, total_xp_for_this_level = 0, BASE_XP, 0
     while total_xp >= total_xp_for_this_level + xp_for_next_level:
         total_xp_for_this_level += xp_for_next_level
         level += 1
-        xp_for_next_level = math.floor(xp_for_next_level * XP_GROWTH_RATE)
+        xp_for_next_level = floor(xp_for_next_level * XP_GROWTH_RATE)
     return {
         "level": level,
         "current_xp": total_xp - total_xp_for_this_level,
@@ -192,15 +189,15 @@ def calculate_stats(skills):
     stats = {stat: 1 for stat in ALL_STATS}  # Base value of 1 for all stats
 
     # Example logic: Strength from mining, Dexterity from woodcutting, Intelligence from foraging
-    if 'mining' in skills:
-        stats['strength'] += math.floor(
-            get_level_from_xp(skills['mining'])['level'] / 5)
-    if 'woodcutting' in skills:
-        stats['dexterity'] += math.floor(
-            get_level_from_xp(skills['woodcutting'])['level'] / 5)
-    if 'foraging' in skills:
-        stats['intelligence'] += math.floor(
-            get_level_from_xp(skills['foraging'])['level'] / 3)
+    if "mining" in skills:
+        stats["strength"] += floor(
+            get_level_from_xp(skills["mining"])["level"] / 5)
+    if "woodcutting" in skills:
+        stats["dexterity"] += floor(
+            get_level_from_xp(skills["woodcutting"])["level"] / 5)
+    if "foraging" in skills:
+        stats["intelligence"] += floor(
+            get_level_from_xp(skills["foraging"])["level"] / 3)
 
     return stats
 
@@ -220,20 +217,20 @@ def get_processed_game_state():
         profile = read_profile(name)
 
         # Store the raw skills before processing for stats calculation
-        raw_skills = profile['data']['skills'].copy()
+        raw_skills = profile["data"]["skills"].copy()
 
         processed_skills, profile_total_level = {}, 0
         # Process skills for both valid and corrupt profiles to show levels if possible
-        for skill_name, total_xp in profile['data']['skills'].items():
+        for skill_name, total_xp in profile["data"]["skills"].items():
             derived_stats = get_level_from_xp(total_xp)
             processed_skills[skill_name] = {
                 "total_xp": total_xp, **derived_stats}
-            profile_total_level += derived_stats['level']
-        profile['data']['skills'] = processed_skills
-        profile['total_level'] = profile_total_level
+            profile_total_level += derived_stats["level"]
+        profile["data"]["skills"] = processed_skills
+        profile["total_level"] = profile_total_level
 
         # Calculate stats using the raw skill XP values
-        profile['data']['stats'] = calculate_stats(raw_skills)
+        profile["data"]["stats"] = calculate_stats(raw_skills)
 
         all_profiles.append(profile)
         if name == selected_name:
@@ -248,7 +245,7 @@ def handle_action(action_id):
     selected_name = get_selected_profile_name()
     profile = read_profile(selected_name)
 
-    if profile['status'] == 'corrupt':
+    if profile["status"] == "corrupt":
         return {"error": "Cannot perform actions on a corrupt profile. Please fix it first."}
 
     action_map = {
@@ -259,25 +256,24 @@ def handle_action(action_id):
 
     if action_id in action_map:
         action_info = action_map[action_id]
-        skill = action_info['skill']
-        item = action_info.get('item')
+        skill = action_info["skill"]
+        item = action_info.get("item")
 
-        profile['data']['skills'][skill] += action_info['xp']
+        profile["data"]["skills"][skill] += action_info["xp"]
         if item:
-            profile['data']['inventory'][item] = profile['data']['inventory'].get(
-                item, 0) + action_info.get('quantity', 0)
+            profile["data"]["inventory"][item] = profile["data"]["inventory"].get(
+                item, 0) + action_info.get("quantity", 0)
 
-        write_profile(selected_name, profile['data'])
+        write_profile(selected_name, profile["data"])
 
         updated_state = get_processed_game_state()
-        updated_state['recent_gain'] = action_info
+        updated_state["recent_gain"] = action_info
         return updated_state
     else:
         return {"error": "Unknown action ID"}
 
+
 # --- Profile Management Functions ---
-
-
 def new_profile(name):
     if not name or name.isspace():
         return {"error": "Profile name cannot be empty"}
@@ -308,7 +304,7 @@ def rename_profile(new_name):
     if new_name.lower() in {p.lower() for p in profile_list if p.lower() != selected_name.lower()}:
         return {"error": f"Profile name '{new_name}' already exists."}
 
-    profile_data = read_profile(selected_name)['data']
+    profile_data = read_profile(selected_name)["data"]
 
     write_profile(new_name, profile_data)
     set_selected_profile_name(new_name)
@@ -358,7 +354,7 @@ def fix_profile(index_to_fix):
 
 def hard_reset():
     """Deletes all profiles and starts fresh."""
-    for profile_file in PROFILES_DIR.glob('*.json'):
+    for profile_file in PROFILES_DIR.glob("*.json"):
         profile_file.unlink()
 
     if SETTINGS_FILE.exists():
@@ -381,12 +377,12 @@ def get_settings():
     if not SETTINGS_FILE.exists():
         return defaults
     try:
-        settings = json.loads(SETTINGS_FILE.read_text())
+        settings = json_loads(SETTINGS_FILE.read_text())
         for k, v in defaults.items():
             if k not in settings:
                 settings[k] = v
         return settings
-    except (IOError, json.JSONDecodeError):
+    except (IOError, JSONDecodeError):
         return defaults
 
 
@@ -395,9 +391,9 @@ def set_settings(new_settings):
     settings = {}
     if SETTINGS_FILE.exists():
         try:
-            settings = json.loads(SETTINGS_FILE.read_text())
-        except (IOError, json.JSONDecodeError):
+            settings = json_loads(SETTINGS_FILE.read_text())
+        except (IOError, JSONDecodeError):
             settings = {}
     settings.update(new_settings)
-    SETTINGS_FILE.write_text(json.dumps(settings, indent=2))
+    SETTINGS_FILE.write_text(json_dumps(settings, indent=2))
     return True

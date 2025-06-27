@@ -2,6 +2,7 @@
 __pycache__/
 .venv/
 venv/
+*.egg-info/
 
 # VS Code settings
 .vscode/
@@ -10,5 +11,3 @@ venv/
 profiles/*.json
 # Ignore user-specific settings
 /data/settings.json
-
-to-ask-gemini.txt
